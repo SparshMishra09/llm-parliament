@@ -13,6 +13,11 @@ consensus, split views, risks, and a recommendation.
 Built on multi-agent debate, a technique shown to improve AI accuracy by
 7-15% in research (Liang et al. 2023, Chen et al. 2023).
 
+![Three models debating a question live in the terminal, ending in a four-part verdict](docs/assets/demo.svg)
+
+*A real recording of `parliament ask --mock` — mock mode ships in the box, so
+you can watch a full debate without any API keys or setup.*
+
 See [CHANGELOG.md](CHANGELOG.md) for the release history.
 
 ---
@@ -32,6 +37,14 @@ See [CHANGELOG.md](CHANGELOG.md) for the release history.
 ---
 
 ## Quick Start
+
+Try it in one command — no install, no API keys (needs [uv](https://docs.astral.sh/uv/)):
+
+```bash
+uvx --from llm-parliament parliament ask "Should we migrate our REST API to gRPC?" --mock
+```
+
+To keep it around:
 
 ```bash
 pipx install llm-parliament
@@ -311,6 +324,13 @@ parliament ask "Quick check?" --no-show-debate
 
 # Choose the Speaker for the final synthesis
 parliament ask "What are the main risks?" --speaker Claude
+
+# Pipe the question (and any context) in from stdin with "-"
+git diff | parliament ask -
+{ echo "Review this change:"; git diff; } | parliament ask -
+
+# Machine-readable output for scripts — full Hansard as JSON on stdout
+parliament ask "Which queue should we use?" --json | jq -r .synthesis.recommendation
 
 # Show configured members
 parliament members

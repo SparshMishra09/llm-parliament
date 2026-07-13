@@ -295,3 +295,52 @@ def test_update_cli_pull_failure_exits_one(monkeypatch):
     result = CliRunner().invoke(cli.main, ["update"])
     assert result.exit_code == 1
     assert "fail" in result.output.lower() or "conflict" in result.output.lower()
+
+
+# ---------- ask --json / stdin question ----------
+
+
+def test_ask_json_prints_parseable_hansard(monkeypatch):
+    import json
+
+    monkeypatch.delenv("PARLIAMENT_SHOW_DEBATE", raising=False)
+
+    result = CliRunner().invoke(cli.main, ["ask", "--mock", "--json", "Postgres or Mongo?"])
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["bill"]["content"] == "Postgres or Mongo?"
+    assert len(data["members"]) == 3
+    assert data["synthesis"]["recommendation"]
+
+
+def test_ask_json_suppresses_live_view_and_verdict_panels(monkeypatch):
+    monkeypatch.delenv("PARLIAMENT_SHOW_DEBATE", raising=False)
+
+    result = CliRunner().invoke(cli.main, ["ask", "--mock", "--json", "Test?"])
+
+    assert result.exit_code == 0, result.output
+    # stdout must be pure JSON — no Rich panels, phase headers, or verdict text.
+    assert result.output.lstrip().startswith("{")
+    assert "Parliament Session" not in result.output
+    assert "═" not in result.output
+
+
+def test_ask_question_dash_reads_stdin():
+    import json
+
+    result = CliRunner().invoke(
+        cli.main,
+        ["ask", "--mock", "--json", "-"],
+        input="Should we ship on Friday?\n",
+    )
+
+    assert result.exit_code == 0, result.output
+    data = json.loads(result.output)
+    assert data["bill"]["content"] == "Should we ship on Friday?"
+
+
+def test_ask_question_dash_empty_stdin_errors():
+    result = CliRunner().invoke(cli.main, ["ask", "--mock", "-"], input="")
+
+    assert result.exit_code == 1

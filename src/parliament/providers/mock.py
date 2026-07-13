@@ -3,16 +3,26 @@
 from __future__ import annotations
 
 import asyncio
+import os
 
 from parliament.providers.base import Provider
+
+
+def _default_latency_ms() -> int:
+    """Latency per mock call; PARLIAMENT_MOCK_LATENCY_MS overrides (demos, dev)."""
+    raw = os.environ.get("PARLIAMENT_MOCK_LATENCY_MS", "")
+    try:
+        return max(0, int(raw))
+    except ValueError:
+        return 50
 
 
 class MockProvider(Provider):
     name = "mock"
 
-    def __init__(self, model: str = "mock-v1", latency_ms: int = 50) -> None:
+    def __init__(self, model: str = "mock-v1", latency_ms: int | None = None) -> None:
         self.model = model
-        self._latency_ms = latency_ms
+        self._latency_ms = _default_latency_ms() if latency_ms is None else latency_ms
 
     async def generate(self, prompt: str, system: str | None = None) -> str:
         # Simulate realistic latency

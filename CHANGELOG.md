@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`parliament ask --json`** — prints the full Hansard as JSON on stdout for
+  scripting (`... --json | jq -r .synthesis.recommendation`). Live view and
+  verdict rendering are suppressed; warnings and errors go to stderr so pipes
+  stay clean.
+- **Stdin questions** — `parliament ask -` reads the question (and any piped
+  context, e.g. `git diff | parliament ask -`) from stdin.
+- **`PARLIAMENT_MOCK_LATENCY_MS`** — overrides the mock provider's simulated
+  latency; useful for demos and development.
+- **Animated demo in the README** — a recording of a full mock debate
+  (`docs/assets/demo.svg`), plus a zero-install `uvx` quick-start line.
+
 ## [0.2.0] — 2026-05-19
 
 ### Added
