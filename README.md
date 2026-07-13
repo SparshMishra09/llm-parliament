@@ -32,6 +32,10 @@ See [CHANGELOG.md](CHANGELOG.md) for the release history.
 > [open an issue](https://github.com/elarmuzik1993/llm-parliament/issues/new) or
 > say hi in [Discussions](https://github.com/elarmuzik1993/llm-parliament/discussions).
 >
+> Want to jump in? Check the [roadmap](https://github.com/elarmuzik1993/llm-parliament/issues/15)
+> or grab a [good first issue](https://github.com/elarmuzik1993/llm-parliament/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) —
+> a couple need no code at all.
+>
 > Stars also help me see what's resonating. Thanks for taking a look. 🙏
 
 ---
@@ -251,6 +255,46 @@ parliament keys list
 parliament keys migrate   # move existing keys.env entries to the OS keyring
 parliament keys remove openai
 ```
+
+## Personas — give each member a stance
+
+By default members differ only by model. Personas make them argue from
+genuinely different positions, which sharpens the debate — the split views
+are where a parliament earns its keep:
+
+```yaml
+parliament:
+  members:
+    - name: Claude
+      provider: anthropic
+      model: claude-sonnet-4-6
+      persona: security-skeptic
+    - name: Gemini
+      provider: google
+      model: gemini-2.5-flash
+      persona: pragmatist
+    - name: GPT
+      provider: openai
+      model: gpt-4o-mini
+      persona: devils-advocate
+```
+
+A persona is a system prompt applied during First Reading and Debate; the
+Division Speaker always stays neutral. Five ship built in:
+
+| Persona | Stance |
+|---|---|
+| `security-skeptic` | assumes the proposal will be attacked, misused, and paged on at 3am |
+| `pragmatist` | favors boring technology, small reversible steps, calls out gold-plating |
+| `devils-advocate` | argues the strongest honest case against the emerging consensus |
+| `cost-hawk` | traces every proposal to its full cost — build, run, maintain, unwind |
+| `user-champion` | judges everything by the experience of the people who'll use the result |
+
+List them with `parliament personas`. Write your own by dropping a Markdown
+file in `~/.parliament/personas/<name>.md` — the file body becomes the system
+prompt, and `persona: <name>` picks it up. If you write a persona others
+would enjoy, share it in
+[Discussions](https://github.com/elarmuzik1993/llm-parliament/discussions)!
 
 ## Does it cost 3× more?
 

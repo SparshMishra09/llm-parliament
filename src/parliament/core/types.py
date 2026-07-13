@@ -28,6 +28,7 @@ class Member:
     provider_name: str  # "ollama", "anthropic", "openai", "google", "mock"
     model: str
     tier: int = 3  # resolved from MODEL_TIERS, default = capable
+    persona: str = ""  # persona name ("" = none); see parliament.personas
 
     def __str__(self) -> str:
         return f"{self.name} ({self.provider_name}/{self.model})"

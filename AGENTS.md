@@ -33,6 +33,7 @@ src/parliament/
   config.py           YAML config loading, key management, resolve_* helpers
   doctor.py           Health check logic (Python, curses, terminal, providers, Ollama)
   model_catalog.py    Known model presets + tier data for pickers
+  personas.py         Built-in member personas + user persona file resolution
   core/
     parliament.py     Parliament orchestrator — ask() coroutine, member/provider wiring
     types.py          Dataclasses: Member, Bill, Response, Synthesis, Hansard, ProgressEvent

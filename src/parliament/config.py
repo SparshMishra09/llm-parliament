@@ -301,8 +301,22 @@ def build_parliament_from_config(
         provider_name = mc["provider"]
         model = mc["model"]
         tier = get_tier(model)
+        persona = mc.get("persona") or ""
 
-        member = Member(name=name, provider_name=provider_name, model=model, tier=tier)
+        # Validate here so a bad persona name fails at build time with a
+        # clear message instead of mid-debate.
+        if persona:
+            from parliament.personas import resolve_persona
+
+            resolve_persona(persona)
+
+        member = Member(
+            name=name,
+            provider_name=provider_name,
+            model=model,
+            tier=tier,
+            persona=persona,
+        )
         members.append(member)
 
         # Build provider with any extra config (base_url, api_key, etc.)

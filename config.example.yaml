@@ -22,6 +22,17 @@
 # Cloud providers need API keys. Set them via the TUI (saves to
 # ~/.parliament/keys.env, chmod 0600), or export the env var directly:
 #   ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY
+#
+# Any member can take an optional persona — a named debate stance applied
+# as a system prompt during First Reading and Debate:
+#
+#   - name: Claude
+#     provider: anthropic
+#     model: claude-haiku-4-5-20251001
+#     persona: security-skeptic
+#
+# List available personas with `parliament personas`. Add your own as
+# ~/.parliament/personas/<name>.md (the file body is the system prompt).
 
 parliament:
   name: House of AI

@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Member personas** — optional `persona:` field on config members applies a
+  named debate stance as a system prompt during First Reading and Debate
+  (Speaker stays neutral). Five built-ins (`security-skeptic`, `pragmatist`,
+  `devils-advocate`, `cost-hawk`, `user-champion`); user personas load from
+  `~/.parliament/personas/<name>.md`. New `parliament personas` command lists
+  them. Unknown names fail at startup with the available list.
 - **`parliament ask --json`** — prints the full Hansard as JSON on stdout for
   scripting (`... --json | jq -r .synthesis.recommendation`). Live view and
   verdict rendering are suppressed; warnings and errors go to stderr so pipes

@@ -270,6 +270,31 @@ def members(config_path: Path | None):
 
 
 @main.command()
+def personas():
+    """List available member personas (built-in and user-defined)."""
+    from parliament.personas import PERSONAS_DIR, available_personas, resolve_persona
+
+    table = Table(title="Personas", show_lines=False)
+    table.add_column("Name", style="bold")
+    table.add_column("Source")
+    table.add_column("Stance")
+
+    for name, source in available_personas().items():
+        try:
+            prompt = resolve_persona(name)
+        except ValueError as e:
+            prompt = f"(unreadable: {e})"
+        summary = prompt if len(prompt) <= 80 else prompt[:77].rstrip() + "..."
+        table.add_row(name, "builtin" if source == "builtin" else "user", summary)
+
+    console.print(table)
+    console.print(
+        f"\n[dim]Assign in config: members[].persona: <name>  ·  "
+        f"add your own: {PERSONAS_DIR}/<name>.md[/dim]"
+    )
+
+
+@main.command()
 @click.option("--config", "config_path", type=click.Path(exists=True, path_type=Path), default=None)
 @click.option("--speaker", default=None, help="Override Speaker selection")
 @click.option("--mock", is_flag=True, help="Use mock providers (dev/testing)")

@@ -4,6 +4,10 @@ Thanks for taking the time to contribute.
 
 ## Before you start
 
+- New here? The [roadmap](https://github.com/elarmuzik1993/llm-parliament/issues/15)
+  shows where the project is heading, and issues labeled
+  [`good first issue`](https://github.com/elarmuzik1993/llm-parliament/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+  are scoped for a first contribution — some need no code at all.
 - Check [open issues](https://github.com/elarmuzik1993/llm-parliament/issues)
   to avoid duplicating work.
 - For significant changes, open an issue first to discuss the approach.
@@ -21,7 +25,7 @@ pip install -e ".[dev]"
 ## Before submitting a PR
 
 ```bash
-python -m pytest -q    # all 400 tests must pass
+python -m pytest -q    # the full suite must pass
 ruff check .           # must be clean
 ```
 

@@ -7,6 +7,7 @@ import time
 from typing import Callable
 
 from parliament.core.types import Bill, Member, ProgressEvent, Response
+from parliament.personas import persona_system
 from parliament.providers.base import Provider
 from parliament.providers.errors import format_provider_error
 
@@ -62,7 +63,7 @@ async def _debate_one(
             own_response=own_response,
             peer_blocks=_build_peer_blocks(peers),
         )
-        content = await provider.generate(prompt)
+        content = await provider.generate(prompt, system=persona_system(member.persona))
         duration_ms = int((time.monotonic() - start) * 1000)
         response = Response(
             member_name=member.name,
