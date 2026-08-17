@@ -4,32 +4,58 @@
 [![Python](https://img.shields.io/pypi/pyversions/llm-parliament.svg)](https://pypi.org/project/llm-parliament/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
-Multi-agent debate for better AI decisions. Research-backed, local-first.
+**Three AI models debate your question, then tell you where they disagreed.**
 
-Three AI models debate your question through a parliamentary process:
-First Reading, Debate, and Division. The result is a structured verdict with
-consensus, split views, risks, and a recommendation.
-
-Built on multi-agent debate, a technique shown to improve AI accuracy by
-7-15% in research (Liang et al. 2023, Chen et al. 2023).
-
-See [CHANGELOG.md](CHANGELOG.md) for the release history.
+One model gives you one answer, stated with equal confidence whether it's
+certain or guessing. Parliament runs three models through a structured debate
+and shows you the part a single answer hides: **the split.**
 
 ---
 
-> 👋 **This is my GitHub and developer debut!**
-> `llm-parliament` is the first project I've shipped publicly. I built it to learn,
-> and I'd genuinely love your help making it better.
->
-> Feedback, bug reports, feature ideas, code review, and pull requests are **very
-> welcome** — no contribution is too small. If something feels confusing, doesn't
-> install, breaks on your terminal, or could be more polished, please
-> [open an issue](https://github.com/elarmuzik1993/llm-parliament/issues/new) or
-> say hi in [Discussions](https://github.com/elarmuzik1993/llm-parliament/discussions).
->
-> Stars also help me see what's resonating. Thanks for taking a look. 🙏
+## What you actually get
 
----
+Ask a question with real trade-offs, and the verdict looks like this:
+
+```text
+╭─────────────── Parliament Verdict ────────────────╮
+│ Should we migrate our REST API to GraphQL?        │
+╰───────────────────────────────────────────────────╯
+
+╭─────────────────── ℹ Consensus ───────────────────╮
+│ All three agree the current REST endpoints are    │
+│ over-fetching badly on mobile, and that this is   │
+│ a real cost worth fixing.                         │
+╰───────────────────────────────────────────────────╯
+╭───────────────────── ⚖ Split ─────────────────────╮
+│ Claude and Gemini favour a full migration.        │
+│ GPT dissents: with a 4-person team and no prior   │
+│ GraphQL experience, it argues the N+1 and caching │
+│ problems will cost more than the over-fetching    │
+│ they're meant to solve.                           │
+╰───────────────────────────────────────────────────╯
+╭───────────────────── ! Risks ─────────────────────╮
+│ - Resolver N+1 queries without DataLoader         │
+│ - CDN caching no longer works on a single POST    │
+│ - Team has no GraphQL production experience       │
+╰───────────────────────────────────────────────────╯
+╭──────────────── ✓ Recommendation ─────────────────╮
+│ Don't migrate wholesale. Add a GraphQL gateway in │
+│ front of the three worst-offending mobile         │
+│ endpoints, measure for a quarter, then decide.    │
+╰───────────────────────────────────────────────────╯
+```
+
+> *Illustrative example of the output format.*
+
+**That ⚖ Split panel is the whole point.** A single model would have picked one
+of those positions and presented it as the answer. Here you can see that the
+recommendation was contested, who contested it, and on what grounds — which is
+exactly the information you need to decide whether to trust it.
+
+Built on multi-agent debate, a technique shown to improve AI accuracy by 7–15%
+in research (Liang et al. 2023, Chen et al. 2023). The process runs in three
+phases: **First Reading** (each model answers independently), **Debate** (each
+model critiques the others), **Division** (a Speaker synthesises the verdict).
 
 ## Quick Start
 
@@ -39,60 +65,86 @@ parliament doctor
 parliament              # opens the TUI
 ```
 
-The mock parliament runs out of the box with no setup.
+The mock parliament runs out of the box with zero setup — useful for seeing the
+format, though the mock models produce placeholder text, not real analysis.
+
+**For a real debate, one API key is enough.** Parliament seats three members,
+but they don't need to come from three different companies:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...   # or OPENAI_API_KEY, or GOOGLE_API_KEY
+parliament doctor                      # wizard detects the key, seats three models
+```
+
+With one key, the wizard seats three models from that provider at different
+capability tiers. With two or three keys, you get cross-provider debate — which
+produces more genuine disagreement, since models from the same lab tend to share
+blind spots. With Ollama, it costs nothing at all. See
+[Choosing your models](#choosing-your-models).
+
+## When to use it
+
+Parliament is a deliberation tool, not a throughput tool.
+
+| Good fit | Poor fit |
+|---|---|
+| Architecture and design trade-offs | Quick lookups and factual questions |
+| "Should we adopt X?" decisions | Drafting, summarising, rewriting |
+| Reviewing a plan for blind spots | Anything with one obvious answer |
+| Choices that are expensive to reverse | High-volume automated calls |
+
+**Rule of thumb:** if being wrong costs more than an hour of your time, it's
+worth a debate. Otherwise ask one model.
 
 ## Installation
 
 The recommended way is **pipx** — it installs the tool into an isolated
-environment but exposes `parliament` globally on your PATH, so you don't
-have to think about virtual environments.
+environment but exposes `parliament` globally on your PATH.
 
-### Linux
+| Platform | One-time prereq | Install |
+|---|---|---|
+| Linux | `sudo apt install pipx && pipx ensurepath` | `pipx install llm-parliament` |
+| macOS | `brew install pipx && pipx ensurepath` | `pipx install llm-parliament` |
+| Windows | `python -m pip install --user pipx`<br>`python -m pipx ensurepath` | `pipx install llm-parliament` |
+
+Restart your shell after `ensurepath`, then verify with `parliament doctor`.
+
+<details>
+<summary>Full per-platform commands</summary>
+
+**Linux**
 
 ```bash
-# Prereqs (one-time)
-sudo apt install pipx          # Debian/Ubuntu — or `pacman -S python-pipx`, `dnf install pipx`
-pipx ensurepath                # adds ~/.local/bin to PATH
+sudo apt install pipx          # or `pacman -S python-pipx`, `dnf install pipx`
+pipx ensurepath
 # Restart your shell.
-
-# Install
 pipx install llm-parliament
-
-# Verify
 parliament doctor
 ```
 
-### macOS
+**macOS**
 
 ```bash
-# Prereqs (one-time)
 brew install pipx
 pipx ensurepath
 # Restart your shell.
-
-# Install
 pipx install llm-parliament
-
-# Verify
 parliament doctor
 ```
 
-### Windows
+**Windows (PowerShell)**
 
 ```powershell
-# Prereqs (one-time)
-# 1. Install Python 3.11+ from python.org — check "Add Python to PATH" during install.
+# 1. Install Python 3.11+ from python.org — check "Add Python to PATH".
 # 2. Install pipx:
 python -m pip install --user pipx
 python -m pipx ensurepath
 # 3. Close and reopen Windows Terminal (recommended) or PowerShell.
-
-# Install
 pipx install llm-parliament
-
-# Verify
 parliament doctor
 ```
+
+</details>
 
 **Notes:**
 
@@ -102,8 +154,6 @@ parliament doctor
 - Keys are stored in the OS native credential store (Windows Credential Manager, macOS Keychain, GNOME Keyring) via `parliament keys set`. Falls back to `~/.parliament/keys.env` if no keyring is available.
 
 ## Verify your install
-
-After install, run:
 
 ```bash
 parliament doctor
@@ -134,7 +184,25 @@ Exit code is `0` if the install is functional (regardless of whether you
 have keys/Ollama configured), or `1` if something is broken (e.g. Python
 too old).
 
-## Configuration
+## Choosing your models
+
+**You do not need three providers.** Pick whichever row matches what you already
+have — the first-run wizard detects your situation and proposes the right one
+automatically.
+
+| You have | You get | Cost per debate |
+|---|---|---|
+| Nothing | Mock parliament — placeholder text, format only | $0 |
+| **One cloud key** | Three models from that provider, tiered | ~$0.02–0.10 |
+| Two or three cloud keys | Cross-provider debate — the most genuine disagreement | ~$0.04–0.30 |
+| Ollama, 8 GB+ RAM | Three local models, fully private | $0 |
+| One cloud key + Ollama | One strong cloud Speaker, two cheap local members | ~$0.01–0.03 |
+
+Cross-provider debate is the best version of this tool — three models from
+different labs disagree more usefully than three from one. But a single-provider
+house still works, and it's the fastest way to try it properly.
+
+### Configuration
 
 Your personal config lives at `~/.parliament/config.yaml` (or
 `%USERPROFILE%\.parliament\config.yaml` on Windows) — outside the repo, so
@@ -166,44 +234,14 @@ Confirm with `Y` and the config is written. If no keys or Ollama are detected,
 you get a working mock preset — no setup needed to verify the install. Edit
 members later via the TUI (`parliament`) or directly in the file.
 
-## Optional: Local Models (Ollama)
-
-Ollama runs LLMs locally — free, private, no API keys. Install it
-separately, then point a parliament member at it.
-
-1. Install Ollama from <https://ollama.com> and start the daemon.
-2. Pull a model:
-   ```bash
-   ollama pull llama3.1
-   ```
-3. Edit `~/.parliament/config.yaml` (or use the TUI) to add an Ollama
-   member:
-   ```yaml
-   parliament:
-     members:
-       - name: Llama
-         provider: ollama
-         model: llama3.1
-   providers:
-     ollama:
-       base_url: http://localhost:11434/v1
-   ```
-4. Run `parliament` to start a debate.
-
-> **Note:** All providers default to no timeout (`timeout: null`), so a
-> slow local model on modest hardware won't be cut off. If you want a
-> hard limit, set `timeout: 600.0` on the relevant `providers.<name>`
-> block.
-
-## Optional: Cloud Models
+### Cloud keys
 
 **Easiest path** — export your keys in your shell profile before the first run
 and the wizard picks them up automatically:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-export GOOGLE_API_KEY=...
-parliament doctor   # wizard fires, detects keys, writes a cloud preset
+parliament doctor   # wizard fires, detects keys, writes a matching preset
 ```
 
 **After first run** — add or change keys at any time:
@@ -212,6 +250,10 @@ parliament doctor   # wizard fires, detects keys, writes a cloud preset
 parliament keys set anthropic sk-ant-...
 parliament keys set google ...
 parliament keys set openai sk-...
+
+parliament keys list
+parliament keys migrate   # move existing keys.env entries to the OS keyring
+parliament keys remove openai
 ```
 
 Keys are saved to the OS native credential store. Then edit members via the
@@ -231,68 +273,51 @@ parliament:
 You can also export `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and
 `GOOGLE_API_KEY` directly in your environment instead of using the keyring.
 
-Useful key commands:
+### Local models (Ollama)
 
-```bash
-parliament keys list
-parliament keys migrate   # move existing keys.env entries to the OS keyring
-parliament keys remove openai
-```
+Ollama runs LLMs locally — free, private, no API keys.
 
-## Does it cost 3× more?
+1. Install Ollama from <https://ollama.com> and start the daemon.
+2. Pull a model:
+   ```bash
+   ollama pull llama3.1
+   ```
+3. Edit `~/.parliament/config.yaml` (or use the TUI) to add an Ollama member:
+   ```yaml
+   parliament:
+     members:
+       - name: Llama
+         provider: ollama
+         model: llama3.1
+   providers:
+     ollama:
+       base_url: http://localhost:11434/v1
+   ```
+4. Run `parliament` to start a debate.
 
-Yes — Parliament makes more API calls than asking a single model: 3 for First
-Reading, 3 for Debate, 1 for Division (7 total). On cloud APIs, that's real money.
+> **Note:** All providers default to no timeout (`timeout: null`), so a
+> slow local model on modest hardware won't be cut off. If you want a
+> hard limit, set `timeout: 600.0` on the relevant `providers.<name>`
+> block.
 
-**Approximate cost per query:**
+## What it costs
 
-| Setup | Cost | When to use |
-|-------|------|-------------|
-| Single GPT-4o | ~$0.02 | Quick lookups, drafting, anything with an obvious answer |
-| Parliament — 3× cheap (Haiku + Flash-Lite + GPT-4o-mini) | ~$0.04–0.06 | Decisions with real trade-offs |
-| Parliament — 3× mid-tier (Sonnet + GPT-4o + Flash) | ~$0.15–0.30 | High-stakes architecture or strategy calls |
-| Parliament — local Ollama models | ~$0.00 | Any decision, no API cost |
+A debate is **7 API calls** — 3 First Reading, 3 Debate, 1 Division — against 1
+for a single-model question. In absolute terms that's cents, not dollars:
 
-**The right question is whether that cost is worth it for the specific decision.**
+| Setup | Per debate |
+|-------|------|
+| Single GPT-4o (for comparison) | ~$0.02 |
+| Parliament — 3× cheap (Haiku + Flash-Lite + GPT-4o-mini) | ~$0.04–0.06 |
+| Parliament — 3× mid-tier (Sonnet + GPT-4o + Flash) | ~$0.15–0.30 |
+| Parliament — local Ollama models | $0.00 |
 
-Parliament is designed for decisions where being wrong is expensive — architecture
-choices, technical trade-offs, strategy calls. Getting those wrong can cost days
-or weeks of rework. The token cost of a debate is a rounding error compared to
-the cost of a wrong call.
+Two ways to keep it low: **mix tiers** — one strong model as Speaker for the
+Division, two fast cheap ones for First Reading and Debate, which the wizard
+does by default and which lands close to a single mid-tier call. Or **go local**
+— Ollama members cost nothing but electricity.
 
-For quick lookups, summaries, or anything with an obvious answer, use a single
-model. Parliament is a deliberation tool, not a throughput tool.
-
-**Three reasons the cost argument flips:**
-
-1. **Tier mixing closes the gap.** One strong model for Division + two fast cheap
-   models for First Reading and Debate is the default wizard preset — total cost
-   is close to a single mid-tier call, with multi-perspective quality.
-
-2. **Local models make it free.** Ollama runs 3B–13B models on commodity hardware
-   at no API cost. For anyone who can run two small local models, the "3×" concern
-   disappears entirely.
-
-3. **One good answer beats three mediocre ones.** A single-model answer on a hard
-   architectural question has blind spots the model doesn't know it has. The debate
-   surfaces them. If it prevents one wrong architectural decision, it has paid for
-   months of usage.
-
-**Three ways to keep costs low:**
-
-| Approach | Effect |
-|----------|--------|
-| Mix cheap models for First Reading + Debate, one strong model for Division only | Total cost comparable to a single mid-tier call |
-| Run local Ollama models for some or all members | No API cost — just electricity |
-| `parliament ask "..." --mock` | Zero cost — useful for exploring the format |
-
-The first-run wizard (`parliament doctor` on a fresh install) automatically
-suggests a cost-aware preset based on what keys and local models you have
-available. You can also mix cloud and local: e.g. one Anthropic member + two
-Ollama members keeps the cloud bill minimal while still getting the debate benefit.
-
-**Rule of thumb:** if the cost of being wrong on this decision exceeds $1, the
-debate is worth it.
+Use `parliament ask "..." --mock` to explore the format at zero cost.
 
 ## CLI Usage
 
@@ -345,10 +370,11 @@ The view is toggleable via three precedence-ordered sources:
 
 ### Hansard detail levels
 
-By default, both the post-run terminal output and the saved `.md` file
-contain the four-part Speaker synthesis (Consensus, Split, Risks,
-Recommendation) — no LLM transcripts. Older runs that included the full
-debate text by default are now opt-in via `--hansard=full`.
+Every debate is saved as a Markdown file in `~/.parliament/hansards/`. By
+default, both the post-run terminal output and the saved `.md` file contain the
+four-part Speaker synthesis (Consensus, Split, Risks, Recommendation) — no LLM
+transcripts. Older runs that included the full debate text by default are now
+opt-in via `--hansard=full`.
 
 Four levels:
 
@@ -373,7 +399,7 @@ The level applies to the saved `.md` file **and** the post-run terminal
 output. The live in-flight debate view is independent — toggle it
 separately with `--show-debate` / `--no-show-debate`.
 
-TUI controls:
+### TUI controls
 
 ```text
 Type                Edit the question field
@@ -401,6 +427,25 @@ remain derived and read-only. Model pickers include supported presets plus a
 
 Inside the member editor, `Enter` opens provider/model pickers when those
 fields are focused and saves the edit when the base URL field is focused.
+
+## Contributing
+
+> 👋 **This is my GitHub and developer debut!**
+> `llm-parliament` is the first project I've shipped publicly. I built it to learn,
+> and I'd genuinely love your help making it better.
+>
+> Feedback, bug reports, feature ideas, code review, and pull requests are **very
+> welcome** — no contribution is too small. If something feels confusing, doesn't
+> install, breaks on your terminal, or could be more polished, please
+> [open an issue](https://github.com/elarmuzik1993/llm-parliament/issues/new) or
+> say hi in [Discussions](https://github.com/elarmuzik1993/llm-parliament/discussions).
+>
+> Stars also help me see what's resonating. Thanks for taking a look. 🙏
+
+Good first stops: the [open issues](https://github.com/elarmuzik1993/llm-parliament/issues)
+labelled `help wanted`, and [CONTRIBUTING.md](CONTRIBUTING.md) for the
+test-and-lint gate. [AGENTS.md](AGENTS.md) is the architecture source of truth —
+read it before touching the code.
 
 ## Development
 
@@ -475,6 +520,8 @@ CHANGELOG.md              Release history (Keep-a-Changelog)
 RELEASING.md              PyPI release procedure
 ```
 
+See [CHANGELOG.md](CHANGELOG.md) for the release history.
+
 ## Disclaimer
 
 LLM Parliament is an orchestration framework. It coordinates multiple AI models
@@ -511,6 +558,3 @@ There are no other network calls in the codebase.
 ## License
 
 AGPLv3
-
-
- 
