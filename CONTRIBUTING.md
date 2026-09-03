@@ -19,6 +19,53 @@ opening an issue first saves you from building something that gets redirected.
 
 ---
 
+## Claiming an issue
+
+**Comment on the issue before you start building.** One line is enough — "taking
+this" does the job. The maintainer will assign it to you, which puts your name on
+the issue list so the next person can see it's taken.
+
+This exists because it already cost someone an afternoon. Two contributors
+independently built the same feature twelve minutes apart; both PRs were good,
+only one could merge, and the other had to close. Nothing on the issue told
+either of them the other was there.
+
+The rules are deliberately loose:
+
+- **Small changes don't need this.** A typo, a docs line, a one-function fix —
+  just open the PR. Coordinating costs more than the occasional duplicate.
+- **A claim isn't a lock.** If an assigned issue goes quiet for about two weeks,
+  it's fair game again. Life happens and stalled claims shouldn't block the
+  queue. If you're still on it and just slow, say so on the issue and it stays
+  yours — nobody is counting days.
+- **Unclaiming is free and always fine.** "Turned out to be more than I wanted to
+  take on" is a completely respectable comment, and far more useful than silence.
+
+If you want something to work on and nothing is obviously free, ask in
+[Discussions](https://github.com/elarmuzik1993/llm-parliament/discussions) or
+comment on the [roadmap](https://github.com/elarmuzik1993/llm-parliament/issues/15).
+
+## Branch from current `main`
+
+Fetch and branch fresh before you start:
+
+```bash
+git remote add upstream https://github.com/elarmuzik1993/llm-parliament.git
+git fetch upstream main
+git checkout -b my-change upstream/main
+```
+
+CI is new, and a branch cut before it landed won't get a check run at all — the
+PR will just sit there with nothing reported, which looks like something is
+broken when it isn't. Branching from current `main` avoids that.
+
+One more thing worth knowing, so it doesn't look like your PR is being ignored:
+**the first workflow run on a PR from a fork needs the maintainer to approve it.**
+That's a GitHub default, not a judgement about your change. If your checks show
+as pending or absent, that's usually why.
+
+---
+
 ## Ways to help that aren't code
 
 - **Run `parliament doctor` on your machine** and report the result on
@@ -119,6 +166,9 @@ The short version:
 
 Before you open it:
 
+- [ ] The issue it closes is claimed and assigned to you (see
+      [Claiming an issue](#claiming-an-issue)) — or it's small enough not to need it
+- [ ] The branch is cut from current `main`
 - [ ] `python -m pytest -q` passes
 - [ ] `ruff check .` is clean
 - [ ] New behaviour has a test; a bug fix has a regression test
