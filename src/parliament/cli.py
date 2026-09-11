@@ -164,7 +164,7 @@ def _ask_error(
     "hansard_flag",
     type=click.Choice(["minimal", "verdict", "archive", "full"], case_sensitive=False),
     default=None,
-    help="Hansard detail level (default: minimal; override with config or PARLIAMENT_HANSARD_LEVEL)",
+    help="Hansard detail level (default: verdict; override with config or PARLIAMENT_HANSARD_LEVEL)",
 )
 @click.option("--verbose", is_flag=True, help="Alias for --hansard=full (back-compat)")
 @click.option(

@@ -2,6 +2,7 @@
 
 Public surface:
   - HansardLevel enum (minimal | verdict | archive | full)
+  - DEFAULT_LEVEL — the level used when nothing else specifies one
   - includes(level, section) — section-inclusion check
   - render_markdown(hansard, level) — Obsidian/GitHub callout markdown
   - render_terminal(hansard, level, console) — Rich panel print
@@ -30,24 +31,33 @@ class HansardLevel(str, Enum):
 
     @classmethod
     def parse(cls, value: str | None) -> "HansardLevel":
-        """Lenient parser: unknown or None values fall back to MINIMAL.
+        """Lenient parser: unknown or None values fall back to `DEFAULT_LEVEL`.
 
         Emits a UserWarning when an unknown non-empty string is passed so
         the user notices typos in CLI flags / env vars / YAML config.
         """
         if value is None:
-            return cls.MINIMAL
+            return DEFAULT_LEVEL
         s = value.strip().lower() if isinstance(value, str) else None
         if not s:
-            return cls.MINIMAL
+            return DEFAULT_LEVEL
         for level in cls:
             if level.value == s:
                 return level
         warnings.warn(
-            f"Unknown hansard level {value!r}; falling back to {cls.MINIMAL.value!r}",
+            f"Unknown hansard level {value!r}; falling back to {DEFAULT_LEVEL.value!r}",
             stacklevel=2,
         )
-        return cls.MINIMAL
+        return DEFAULT_LEVEL
+
+
+# The level used when nothing else says otherwise — no CLI flag, no env var, no
+# `hansard.level` in config — and the recovery value for unparseable input.
+# `verdict` rather than `minimal` because the split is the part a single model
+# cannot produce, so hiding it by default makes a three-member debate read like
+# an expensive single call. This governs on-screen output only: saved `.md`
+# files are always written at ARCHIVE, and `--json` is not gated by level.
+DEFAULT_LEVEL: HansardLevel = HansardLevel.VERDICT
 
 
 # Section-inclusion matrix — single source of truth for "what's in each level."
@@ -73,8 +83,8 @@ def includes(level: HansardLevel, section: str) -> bool:
 
 # Terminal panel styling — mirrors the markdown callout vocabulary so the
 # in-terminal output and the saved .md feel like the same artifact.
-# Recommendation gets `bold green` (heavier weight) because it's the
-# deliverable; the others are normal-weight color borders.
+# Recommendation gets `bold green` (heavier weight) so a skimming reader can
+# find it without reading the rest; the others are normal-weight color borders.
 _PANEL_STYLES: dict[str, tuple[str, str]] = {
     "consensus":      ("ℹ Consensus",      "blue"),
     "split":          ("⚖ Split",          "yellow"),

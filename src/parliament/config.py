@@ -93,8 +93,8 @@ def resolve_hansard_level(*, cli_flag: str | None, config: dict[str, Any]):
     """Decide the Hansard detail level for this run.
 
     Precedence: CLI flag > PARLIAMENT_HANSARD_LEVEL env var > config
-    `hansard.level` > default `minimal`. Unknown values normalise to
-    `minimal` via `HansardLevel.parse`.
+    `hansard.level` > `render.hansard.DEFAULT_LEVEL` (`verdict`). Unknown
+    values normalise to that same default via `HansardLevel.parse`.
     """
     # Local import to avoid circular dependency: parliament.render.hansard
     # imports from parliament.core.types (which is fine), but we keep

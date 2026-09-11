@@ -122,10 +122,19 @@ A Hansard built from fewer members than configured carries `degraded=True`.
 
 `HansardLevel` in `render/hansard.py` is the single source of truth.
 Four levels (`minimal` → `verdict` → `archive` → `full`), strictly monotonic.
-Precedence for resolution: CLI flag > env var > config > default (`minimal` —
-`HansardLevel.parse` falls back to it for `None` and unknown values).
+Precedence for resolution: CLI flag > env var > config > `DEFAULT_LEVEL`
+(`verdict` — `HansardLevel.parse` falls back to it for `None` and unknown
+values, so the default and the typo-recovery value are the same constant).
 Saved `.md` files are written at `archive` regardless of the display level
-(`tui.py::_save_hansard`).
+(`tui.py::_save_hansard`), and `--json` is not gated by level at all — so the
+level governs on-screen output only.
+
+The default is `verdict` because the split is the output a single model cannot
+produce; defaulting to `minimal` makes a three-member debate read like an
+expensive single call. Changing it means changing `DEFAULT_LEVEL` **and** the
+level materialized into generated configs (`presets.py`) — the wizard writes
+`hansard.level` into every user config, so the built-in default alone never
+reaches an existing install. `tests/test_config.py` pins the two together.
 
 ### Config precedence
 

@@ -298,19 +298,19 @@ _VERDICT_RECOMMENDATION_MARKER = "✓ Recommendation"
 _FULL_TRANSCRIPT_MARKER = "📖 First Reading"
 
 
-def test_ask_default_uses_minimal_level(monkeypatch):
-    """Default behavior: post-run terminal shows recommendation only, no full synthesis."""
+def test_ask_default_uses_verdict_level(monkeypatch):
+    """Default behavior: the split ships without anyone passing a flag."""
     monkeypatch.delenv("PARLIAMENT_HANSARD_LEVEL", raising=False)
     monkeypatch.delenv("PARLIAMENT_SHOW_DEBATE", raising=False)
 
     result = CliRunner().invoke(cli.main, ["ask", "--mock", "--no-show-debate", "Test?"])
 
     assert result.exit_code == 0, result.output
-    # Only recommendation panel appears; no full synthesis sections.
+    # The whole four-part synthesis appears, transcripts do not.
     assert _VERDICT_RECOMMENDATION_MARKER in result.output
-    assert "ℹ Consensus" not in result.output
-    assert "⚖ Split" not in result.output
-    assert "! Risks" not in result.output
+    assert "ℹ Consensus" in result.output
+    assert "⚖ Split" in result.output
+    assert "! Risks" in result.output
     assert _FULL_TRANSCRIPT_MARKER not in result.output
 
 

@@ -31,6 +31,26 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Default Hansard level is now `verdict`** (the full four-part synthesis),
+  reversing the 0.2.0 change to `minimal`. The split — where the members
+  disagreed and why — is the one output a single model cannot produce, and
+  defaulting to the recommendation alone made a three-member debate read like
+  an expensive single call. `config.cloud.yaml` and `config.mixed.yaml` already
+  shipped `level: verdict`; the built-in default and `config.example.yaml` were
+  the outliers, and the three are now pinned to agree by test.
+
+  This affects on-screen output only: saved `.md` files are still always
+  written at `archive`, and `--json` was never gated by level. `minimal` is
+  unchanged and still available via `--hansard=minimal`,
+  `PARLIAMENT_HANSARD_LEVEL`, or `hansard.level` in config.
+
+  **Existing installs keep the level already written in their config.** The
+  first-run wizard materializes `hansard.level`, so a config created before
+  this release still says `minimal` and is left untouched — change it in the
+  TUI settings screen or by editing `~/.parliament/config.yaml`.
+- The default and the typo-recovery value are now one constant,
+  `render.hansard.DEFAULT_LEVEL`, instead of being spelled `MINIMAL` four
+  times inside `HansardLevel.parse`.
 - `CONTRIBUTING.md` expanded — non-code ways to help, mock-only dev loop, a
   change-area-to-file map, recipes for adding a provider or slash command, and
   an explicit PR checklist.

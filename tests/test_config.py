@@ -131,7 +131,7 @@ def test_example_config_carries_hansard_level(fresh_home):
     """The bundled example must surface hansard.level so users discover the toggle."""
     config, _ = fresh_home
     cfg = config.load_config()
-    assert cfg.get("hansard", {}).get("level") == "minimal"
+    assert cfg.get("hansard", {}).get("level") == "verdict"
 
 
 def test_user_supplied_show_debate_false_round_trips(tmp_path, monkeypatch):
@@ -163,3 +163,42 @@ def test_user_supplied_show_debate_false_round_trips(tmp_path, monkeypatch):
 
     assert cfg["display"]["show_debate"] is False
     assert config.resolve_show_debate(cli_flag=None, config=cfg) is False
+
+
+# ── Shipped-config / built-in default agreement ──────────────────────────────
+#
+# `config.cloud.yaml` and `config.mixed.yaml` shipped `level: verdict` while the
+# built-in default and `config.example.yaml` said `minimal`. Nothing caught it
+# because every level is independently valid. These pin the agreement.
+
+def _repo_root() -> Path:
+    """Repo root, or None when running against an installed (non-editable) copy."""
+    root = Path(__file__).resolve().parent.parent
+    return root if (root / "config.example.yaml").is_file() else None
+
+
+@pytest.mark.parametrize(
+    "filename", ["config.example.yaml", "config.cloud.yaml", "config.mixed.yaml"]
+)
+def test_shipped_configs_pin_the_built_in_default_level(filename):
+    """Every shipped YAML must agree with DEFAULT_LEVEL, or the docs lie to someone."""
+    import yaml
+
+    from parliament.render.hansard import DEFAULT_LEVEL
+
+    root = _repo_root()
+    if root is None:
+        pytest.skip("not running from a source checkout")
+
+    cfg = yaml.safe_load((root / filename).read_text(encoding="utf-8"))
+    assert cfg["hansard"]["level"] == DEFAULT_LEVEL.value, (
+        f"{filename} pins a level that is no longer the built-in default"
+    )
+
+
+def test_wizard_presets_pin_the_built_in_default_level():
+    """A materialized level in generated configs silently outlives a default change."""
+    from parliament.presets import build_mock_preset
+    from parliament.render.hansard import DEFAULT_LEVEL
+
+    assert build_mock_preset().config["hansard"]["level"] == DEFAULT_LEVEL.value

@@ -418,18 +418,21 @@ The view is toggleable via three precedence-ordered sources:
 
 ### Hansard detail levels
 
-By default the post-run terminal output is `minimal` — the Speaker's
-recommendation only. Saved `.md` files are always written at `archive` level
-(the full four-part synthesis plus frontmatter) regardless of the display
-level, so nothing is lost from the record. Older runs that printed the full
-debate text are now opt-in via `--hansard=full`.
+By default the post-run terminal output is `verdict` — the full four-part
+synthesis: what the members agreed on, where they split, the risks any of them
+flagged, and the Speaker's recommendation. The split is the part a single model
+cannot give you, so it ships without anyone having to ask for it. Prefer the
+recommendation alone? `--hansard=minimal`. Saved `.md` files are always written
+at `archive` level regardless of the display level, so nothing is lost from the
+record either way. Older runs that printed the full debate text are opt-in via
+`--hansard=full`.
 
 Four levels:
 
 | Level | Includes | Roughly |
 |---|---|---|
-| `minimal` | Recommendation only | **default** — one paragraph, "just tell me what to do" |
-| `verdict` | Full four-part synthesis | concise but complete |
+| `minimal` | Recommendation only | one paragraph, "just tell me what to do" |
+| `verdict` | Full four-part synthesis | **default** — concise but complete |
 | `archive` | + YAML frontmatter + session footer | searchable in Obsidian, no walls of text |
 | `full` | + First Reading + Debate transcripts | today's full record (≈ what `--verbose` used to print) |
 
@@ -440,12 +443,13 @@ Set the level via three precedence-ordered sources:
 | 1 (highest) | CLI flag | `parliament ask "..." --hansard archive` |
 | 2 | Environment variable | `PARLIAMENT_HANSARD_LEVEL=full parliament ask "..."` |
 | 3 | YAML config | `hansard:\n  level: archive` |
-| 4 (default) | Built-in | `minimal` |
+| 4 (default) | Built-in | `verdict` |
 
 `--verbose` continues to work; it's an alias for `--hansard=full`.
-The level applies to the saved `.md` file **and** the post-run terminal
-output. The live in-flight debate view is independent — toggle it
-separately with `--show-debate` / `--no-show-debate`.
+The level applies to the post-run terminal output only — saved `.md` files are
+always written at `archive`, and `--json` is never gated by level. The live
+in-flight debate view is independent — toggle it separately with
+`--show-debate` / `--no-show-debate`.
 
 For machine-readable output, `parliament ask --json` prints the complete
 Hansard object. See [docs/hansard-schema.md](docs/hansard-schema.md) for the

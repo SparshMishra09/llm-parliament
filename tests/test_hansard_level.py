@@ -5,7 +5,7 @@ import warnings
 
 import pytest
 
-from parliament.render.hansard import HansardLevel
+from parliament.render.hansard import DEFAULT_LEVEL, HansardLevel
 
 
 def test_levels_exist():
@@ -33,20 +33,25 @@ def test_parse_known_values(raw, expected):
     assert HansardLevel.parse(raw) is expected
 
 
-def test_parse_none_returns_minimal_default():
-    assert HansardLevel.parse(None) is HansardLevel.MINIMAL
+def test_default_level_is_verdict():
+    """The split is the product; it ships without anyone asking for it."""
+    assert DEFAULT_LEVEL is HansardLevel.VERDICT
 
 
-def test_parse_unknown_returns_minimal_with_warning():
+def test_parse_none_returns_default():
+    assert HansardLevel.parse(None) is DEFAULT_LEVEL
+
+
+def test_parse_unknown_returns_default_with_warning():
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         result = HansardLevel.parse("nonsense")
-    assert result is HansardLevel.MINIMAL
+    assert result is DEFAULT_LEVEL
     assert any("nonsense" in str(w.message) for w in caught)
 
 
-def test_parse_empty_string_returns_minimal():
-    assert HansardLevel.parse("") is HansardLevel.MINIMAL
+def test_parse_empty_string_returns_default():
+    assert HansardLevel.parse("") is DEFAULT_LEVEL
 
 
 from parliament.render.hansard import includes  # noqa: E402

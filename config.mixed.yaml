@@ -27,7 +27,8 @@ providers:
 display:
   show_debate: true
 
-# Hansard detail level — controls saved .md file and post-run terminal print.
+# Hansard detail level — controls the post-run terminal print.
+# Saved .md files are always written at `archive` regardless of this setting.
 # Override per-call with --hansard or PARLIAMENT_HANSARD_LEVEL.
 #   minimal  recommendation only
 #   verdict  full synthesis (default)
