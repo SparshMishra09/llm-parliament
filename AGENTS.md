@@ -175,7 +175,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### Testing
 
 ```bash
-python -m pytest -q          # 433 tests expected (as of #34)
+python -m pytest -q          # 460 tests expected (as of the verdict-default change)
 ruff check .                 # must be clean before any commit
 ```
 
@@ -266,4 +266,6 @@ Config is outside the repo — never committed. Only `config.example.yaml` ships
 ## Current release
 
 `v0.2.0` — tagged `cd6bd45`, published to PyPI 2026-05-19.
-401 tests passing, ruff clean. See `CHANGELOG.md` for full history.
+See `CHANGELOG.md` for full history, and the Testing section above for the
+current expected test count (a count pinned to a tag goes stale immediately —
+this one said 401 long after it stopped being true).
