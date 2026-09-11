@@ -264,9 +264,10 @@ use it:
 parliament keys set openai gsk_...      # a Groq key
 ```
 
-The model picker also reads `GROQ_API_KEY` / `MISTRAL_API_KEY` if you would
-rather keep them separate, and falls back to `OPENAI_API_KEY` when they are
-unset.
+Store it as the openai key even if you would rather keep it separate:
+`GROQ_API_KEY` and `MISTRAL_API_KEY` are not read when running a debate. The
+key comes from `providers.openai.api_key`, or from `OPENAI_API_KEY` if you
+leave that out.
 
 Point the `openai` provider at their address in the top-level `providers:`
 block, the same way `ollama` is configured:
@@ -295,9 +296,18 @@ providers:
 `providers.<name>` is per provider, not per member, so one config picks one
 OpenAI-compatible endpoint at a time.
 
-The model picker lists both live, and their models carry tiers, so a Groq
-`llama-3.3-70b-versatile` (tier 2) sitting beside a `phi3:mini` (tier 4) still
-raises the usual tier-gap warning.
+Their models carry tiers, so a Groq `llama-3.3-70b-versatile` (tier 2) sitting
+beside a `phi3:mini` (tier 4) still raises the usual tier-gap warning.
+
+The TUI's provider picker does not offer `groq` or `mistral` as providers — set
+`provider: openai` with a `base_url`, as above. Writing `provider: groq` in the
+config is an error.
+
+## Other OpenAI-compatible endpoints
+
+Nothing above is specific to Groq or Mistral. Any service speaking the OpenAI
+API — OpenRouter, an aggregator such as one-api, a self-hosted gateway — works
+the same way: point `providers.openai` at its `base_url` and give it a key.
 
 ## Does it cost 3× more?
 
