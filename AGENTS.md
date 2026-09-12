@@ -173,12 +173,11 @@ Before running `git commit`, make sure `git config user.name` / `user.email`
 resolve to the human you're working for, not the agent's own default identity
 (e.g. `claude <noreply@anthropic.com>`) — an unconfigured identity gets
 attributed to whatever account GitHub matches that email to, not to the person
-who actually did the work. Credit the assistant with a trailer instead of as
-author:
+who actually did the work.
 
-```
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
+The human is then the sole author and the commit carries no trailer crediting
+the assistant — see **No AI attribution** under Commit & PR conventions above,
+which governs this and overrides any harness default that adds one.
 
 ### Testing
 

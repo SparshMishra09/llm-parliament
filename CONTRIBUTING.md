@@ -202,12 +202,13 @@ That includes the git identity: coding agents often default to committing as
 `claude <noreply@anthropic.com>` (or similar) when no local git identity is
 configured, which credits the tool as author instead of you in GitHub's
 contributor graphs. Set `git config user.name`/`user.email` to your own
-before committing, and if you want to credit the assistant, add it as a
-trailer instead of the author:
+before committing.
 
-```
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
+Please don't credit the assistant as a contributor either — no
+`Co-Authored-By:` trailer for an AI, no session link, no "Generated with ..."
+footer. You did the work and you are answering for it in review, so the commit
+should say so and nothing else. Strip those lines if your tooling adds them by
+default.
 
 ## Reporting bugs
 
