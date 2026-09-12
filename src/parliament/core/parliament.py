@@ -114,7 +114,7 @@ class Parliament:
         surviving_members = [
             m for m in self.members if m.name in debating_member_names
         ]
-        division_failures = []
+        division_failures: list[str] = []
         while True:
             if len(surviving_members) < 2:
                 raise RuntimeError(

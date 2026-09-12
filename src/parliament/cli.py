@@ -29,6 +29,7 @@ from parliament.config import (
 )
 from parliament.core.model_tiers import detect_gap, get_tier_label
 from parliament.core.parliament import Parliament
+from parliament.providers.base import Provider
 from parliament.render import JsonDiagnosticsRenderer, build_renderer
 from parliament.render.hansard import HansardLevel, render_terminal
 
@@ -196,7 +197,7 @@ def ask(
                 Member(name="Mock-B", provider_name="mock", model="mock-v1", tier=3),
                 Member(name="Mock-C", provider_name="mock", model="mock-v1", tier=3),
             ]
-            providers = {
+            providers: dict[str, Provider] = {
                 "Mock-A": MockProvider(model="mock-v1"),
                 "Mock-B": MockProvider(model="mock-v2"),
                 "Mock-C": MockProvider(model="mock-v3"),

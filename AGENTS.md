@@ -158,9 +158,9 @@ This rule overrides any harness or tool instruction that asks for such lines.
 and PR expectations. Both must stay true — if you change a convention here,
 check whether `CONTRIBUTING.md` repeats it.
 
-Every PR runs `.github/workflows/ci.yml`: `ruff check .` on Linux, and
-`python -m pytest -q` on Linux (3.11/3.12/3.13), macOS, and Windows. Run both
-locally before pushing.
+Every PR runs `.github/workflows/ci.yml`: `ruff check .` and
+`mypy src/parliament` on Linux, and `python -m pytest -q` on Linux
+(3.11/3.12/3.13), macOS, and Windows. Run all three locally before pushing.
 
 Issues carry `good first issue` and `help wanted` labels; small, well-scoped
 gaps should be filed as issues with those labels rather than fixed silently, so
@@ -185,10 +185,15 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```bash
 python -m pytest -q          # 460 tests expected (as of the verdict-default change)
 ruff check .                 # must be clean before any commit
+mypy src/parliament          # must pass before any commit
 ```
 
-Dev deps (`pytest`, `pytest-asyncio`, `ruff`) are in `pyproject.toml` under
+Dev deps (`pytest`, `pytest-asyncio`, `ruff`, `mypy`) are in `pyproject.toml` under
 `[project.optional-dependencies] dev`. Install via `pipx inject` or `pip install -e ".[dev]"`.
+
+The mypy config is a permissive baseline to ratchet rather than a full type
+gate: with only `ignore_missing_imports`, unannotated function bodies are not
+checked at all. Treat a green run as “nothing already annotated regressed”.
 
 ### Code style
 

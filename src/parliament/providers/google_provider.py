@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from parliament.providers.base import Provider
 
 
@@ -29,7 +31,7 @@ class GoogleProvider(Provider):
     async def generate(self, prompt: str, system: str | None = None) -> str:
         client = self._get_client()
 
-        config = {}
+        config: dict[str, Any] = {}
         if system:
             config["system_instruction"] = system
         if self._timeout is not None:

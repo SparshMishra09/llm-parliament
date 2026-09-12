@@ -51,6 +51,14 @@ dev = [
     # cannot tell which findings are theirs. Lift this once #30 decides
     # whether to adopt the new defaults or declare the rule set explicitly.
     "ruff>=0.8,<0.16",
+    # Same reasoning as the ruff pin above, and the stub package is part of
+    # it: mypy adds checks in minor releases, and typeshed decides what a
+    # third-party import resolves to. Pin both, or "mypy is clean" means
+    # something different on every machine -- as it already did on #33, where
+    # adding the `<2.0` cap moved the resolver from 2.3.1 to 1.20.2 and turned
+    # a green job red without a line of source changing.
+    "mypy>=1.0,<1.21",
+    "types-PyYAML>=6,<7",
 ]
 
 [project.scripts]
@@ -96,3 +104,13 @@ line-length = 100
 # it, `extend-select` picks the new defaults up and `select` would have
 # hidden them.
 extend-select = ["B904", "I"]
+
+[tool.mypy]
+# Pin the interpreter the gate checks against, for the same reason the tool
+# itself is pinned: typeshed is version-dependent, so an unpinned
+# `python_version` means mypy reports whatever the contributor's default
+# interpreter implies. 3.14's typeshed, for instance, has dropped
+# `asyncio.WindowsSelectorEventLoopPolicy`. Matches `[tool.ruff]
+# target-version` and `requires-python`.
+python_version = "3.11"
+ignore_missing_imports = true

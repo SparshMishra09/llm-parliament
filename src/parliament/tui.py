@@ -372,6 +372,11 @@ def _disable_terminal_flow_control() -> None:
     terminals because the kernel line discipline consumes it. Silently
     no-ops on Windows or non-TTY stdin.
     """
+    # Checked before `isatty` so mypy narrows the rest of the function to
+    # non-Windows: typeshed marks `termios` Unix-only, and the try/except
+    # below is a runtime guard it cannot see through.
+    if sys.platform == "win32":
+        return
     if not sys.stdin.isatty():
         return
     try:
