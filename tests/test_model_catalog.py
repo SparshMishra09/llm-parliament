@@ -176,13 +176,23 @@ def test_picker_data_for_unknown_provider() -> None:
 
 
 def test_openai_compatible_registry_shape() -> None:
-    # Groq and Mistral speak the OpenAI API at a different address; the
-    # registry is what stops that becoming a second client.
-    assert set(model_catalog.OPENAI_COMPATIBLE) == {"openai", "groq", "mistral"}
+    # Groq, Mistral and OpenRouter speak the OpenAI API at a different address;
+    # the registry is what stops that becoming a second client.
+    assert set(model_catalog.OPENAI_COMPATIBLE) == {
+        "openai",
+        "groq",
+        "mistral",
+        "openrouter",
+    }
     assert model_catalog.OPENAI_COMPATIBLE["groq"].base_url == "https://api.groq.com/openai/v1"
     assert model_catalog.OPENAI_COMPATIBLE["mistral"].base_url == "https://api.mistral.ai/v1"
+    assert (
+        model_catalog.OPENAI_COMPATIBLE["openrouter"].base_url
+        == "https://openrouter.ai/api/v1"
+    )
     assert model_catalog.OPENAI_COMPATIBLE["groq"].env_var == "GROQ_API_KEY"
     assert model_catalog.OPENAI_COMPATIBLE["mistral"].env_var == "MISTRAL_API_KEY"
+    assert model_catalog.OPENAI_COMPATIBLE["openrouter"].env_var == "OPENROUTER_API_KEY"
 
 
 @pytest.mark.parametrize(
@@ -191,6 +201,7 @@ def test_openai_compatible_registry_shape() -> None:
         ("openai", "https://api.openai.com/v1/models"),
         ("groq", "https://api.groq.com/openai/v1/models"),
         ("mistral", "https://api.mistral.ai/v1/models"),
+        ("openrouter", "https://openrouter.ai/api/v1/models"),
     ],
 )
 def test_each_provider_is_asked_at_its_own_address(

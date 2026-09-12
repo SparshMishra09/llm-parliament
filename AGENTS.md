@@ -49,8 +49,9 @@ src/parliament/
     errors.py         Human-readable formatting for provider exceptions
     anthropic_provider.py
     google_provider.py
-    openai_provider.py   (also used for Ollama via base_url override)
-    ollama.py
+    openai_provider.py   OpenAI API; takes a base_url, so it also serves any
+                         OpenAI-compatible endpoint (see model_catalog.py)
+    ollama.py            its own class — hardcodes a dummy key, no auth
     mock.py           Deterministic mock — used in tests and --mock flag
   render/
     __init__.py       build_renderer() factory, SilentRenderer, DebateRenderer ABC

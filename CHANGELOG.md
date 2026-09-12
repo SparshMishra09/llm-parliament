@@ -8,6 +8,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`openrouter` provider** — OpenRouter speaks the OpenAI API at its own
+  address, so it needs no class of its own: it reuses `OpenAIProvider` with the
+  address and the `OPENROUTER_API_KEY` variable read from its
+  `model_catalog.OPENAI_COMPATIBLE` row. A member can now name
+  `provider: openrouter` instead of pointing `openai` at a `base_url`, and
+  because `openrouter` is in `KEY_PROVIDERS`, `parliament keys set openrouter`,
+  `keys list`, the TUI's `/key`, and the doctor's key check all follow with no
+  further wiring. The `groq` and `mistral` registry rows stay discovery-only.
+  Fixes #36.
+
 - **`degraded` on `Hansard`** — `true` when the verdict was reached with fewer
   members than configured because one or more members failed with a provider
   error. Degraded mode itself is unchanged, but `--json` consumers can now tell
