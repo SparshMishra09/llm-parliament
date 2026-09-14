@@ -196,15 +196,25 @@ def fetch_google_models(api_key: str | None, timeout: float = DEFAULT_TIMEOUT) -
 def openai_compatible_key(provider: str) -> str | None:
     """The key to discover `provider`'s models with.
 
-    Its own variable first, then OPENAI_API_KEY -- because pointing the openai
-    provider at Groq means the Groq key is already sitting in OPENAI_API_KEY,
-    and `parliament keys set` only knows anthropic, openai and google. Without
-    the fallback the picker would report "no key" to someone whose config
-    works.
+    For vendors with no `parliament keys set` home (the discovery-only rows
+    `groq` and `mistral`), falling back to `OPENAI_API_KEY` keeps the picker
+    consistent with `provider: openai + base_url`, where the same env var is
+    what the OpenAI SDK actually uses anyway.
+
+    For vendors that do have their own key entry in `KEY_PROVIDERS`
+    (`openrouter`), the fallback is deliberately not applied: it exists so the
+    picker reports "no key" to anyone whose config works, and OpenRouter's
+    works on its own variable (#48). Reaching `OPENAI_API_KEY` here would set
+    up the same leak `providers._create_openai_compatible` now refuses.
     """
     spec = OPENAI_COMPATIBLE.get(provider)
     if spec is None:
         return None
+    # Local import: `config` imports `providers`, which imports this module.
+    # A top-level import here would form a cycle at module load time.
+    from parliament.config import KEY_PROVIDERS
+    if provider in KEY_PROVIDERS:
+        return os.environ.get(spec.env_var)
     return os.environ.get(spec.env_var) or os.environ.get("OPENAI_API_KEY")
 
 

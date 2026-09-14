@@ -55,14 +55,25 @@ def _load_provider_class(
 def _create_openai_compatible(provider_name: str, model: str, **kwargs) -> Provider:
     """Build an OpenAI-compatible provider from its `model_catalog` row.
 
-    The row supplies the address and the *vendor's own* key variable. There is
-    deliberately no fallback to OPENAI_API_KEY here: `model_catalog` allows
-    that for discovery, but sending an OpenAI credential to another vendor
-    would leak it (#48).
+    The row supplies the address; the caller supplies the key (or one is read
+    from the row's own environment variable). A missing key is a hard error,
+    not a silent fallback -- `AsyncOpenAI(api_key=None)` reads `OPENAI_API_KEY`
+    from the process environment for us, which would post an OpenAI credential
+    to a different vendor (#48). Discovery (`openai_compatible_key()` in
+    `model_catalog`) is allowed to borrow; construction here is not.
     """
-    spec = OPENAI_COMPATIBLE[provider_name]
+    spec = OPENAI_COMPATIBLE.get(provider_name)
+    if spec is None:
+        raise ValueError(f"Unknown provider: '{provider_name}'")
     kwargs.setdefault("base_url", spec.base_url)
-    kwargs.setdefault("api_key", os.environ.get(spec.env_var))
+    if "api_key" not in kwargs:
+        key = os.environ.get(spec.env_var)
+        if not key:
+            raise ValueError(
+                f"Provider '{provider_name}' needs {spec.env_var}. "
+                f"Set it with: parliament keys set {provider_name} <key>"
+            )
+        kwargs["api_key"] = key
     return _load_provider_class(
         provider_name, _OPENAI_PROVIDER[0], _OPENAI_PROVIDER[1], model, **kwargs
     )

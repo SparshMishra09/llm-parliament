@@ -77,20 +77,41 @@ def test_openrouter_builds_an_openai_client_at_openrouters_address(monkeypatch):
 
 
 def test_openrouter_does_not_borrow_the_openai_key(monkeypatch):
-    """The #48 safety property.
+    """The #48 safety property, post-fix.
 
-    `openai_compatible_key()` falls back to OPENAI_API_KEY for discovery, and
-    reaching OpenRouter through that fallback would post a real OpenAI
-    credential to OpenRouter. Building the client must not do that.
+    `openai_compatible_key()` in `model_catalog` deliberately falls back to
+    `OPENAI_API_KEY` for discovery, so the model picker can read Groq from the
+    same variable someone uses to configure `provider: openai + base_url`. A
+    missing `OPENROUTER_API_KEY` must not borrow that fallback to build the
+    client: `AsyncOpenAI(api_key=None)` would silently resolve `OPENAI_API_KEY`
+    itself and post a real OpenAI credential to OpenRouter. The fix is to raise
+    rather than reach the SDK with `None`.
     """
     monkeypatch.setenv("OPENAI_API_KEY", "sk-proj-real-openai-secret")
 
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+        create_provider("openrouter", MODEL)
+
+
+def test_openrouter_does_not_use_the_openai_key_when_both_are_set(monkeypatch):
+    """The corollary: when the user does supply an `OPENROUTER_API_KEY`, the
+    constructed client uses it -- not `OPENAI_API_KEY`. Reaching the SDK
+    client (`_get_client().api_key`) proves no other layer swapped the
+    credential, and is the assertion the previous form of this test stopped
+    one call short of.
+    """
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-proj-real-openai-secret")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-dedicated")
+
     provider = create_provider("openrouter", MODEL)
 
-    assert provider._api_key is None
+    assert provider._api_key == "sk-or-dedicated"
+    assert provider._get_client().api_key == "sk-or-dedicated"
 
 
-def test_config_base_url_overrides_the_registry_default():
+def test_config_base_url_overrides_the_registry_default(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+
     provider = create_provider(
         "openrouter", MODEL, base_url="https://gateway.internal/v1"
     )
